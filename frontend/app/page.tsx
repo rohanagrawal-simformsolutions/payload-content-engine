@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCms } from "@/contexts/CmsContext";
 import api from "@/lib/api";
 
 interface Article {
@@ -21,19 +22,18 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { isAuthenticated, token } = useAuth();
+  const { cms } = useCms();
 
   useEffect(() => {
     fetchArticles();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, cms]);
 
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      // Always fetch published articles (public)
-      const publishedResponse = await fetch("http://localhost:3000/articles");
-      if (!publishedResponse.ok) throw new Error("Failed to fetch articles");
-      const publishedData = await publishedResponse.json();
-      setPublishedArticles(publishedData.docs || []);
+      // Always fetch published articles (public) - using api instance to include CMS parameter
+      const publishedResponse = await api.get("/articles");
+      setPublishedArticles(publishedResponse.data.docs || []);
 
       // If authenticated, also fetch draft articles
       if (isAuthenticated && token) {

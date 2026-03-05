@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "articles"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "string",
+      "required": true
+    },
+    "summaryTitle": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "featuredImage": {
+      "type": "text"
+    },
+    "tags": {
+      "type": "json"
+    },
+    "author": {
+      "type": "string"
+    }
+  }
+}

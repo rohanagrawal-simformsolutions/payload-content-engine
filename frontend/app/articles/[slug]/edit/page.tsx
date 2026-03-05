@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCms } from "@/contexts/CmsContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RichTextEditor from "@/components/RichTextEditor";
 
@@ -27,6 +28,7 @@ function EditArticleForm() {
   const params = useParams();
   const slug = params.slug as string;
   const { token } = useAuth();
+  const { cms } = useCms();
 
   const [articleId, setArticleId] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -52,7 +54,7 @@ function EditArticleForm() {
       fetchUsers();
       fetchArticle();
     }
-  }, [slug]);
+  }, [slug, cms]);
 
   const fetchUsers = async () => {
     try {
@@ -65,9 +67,8 @@ function EditArticleForm() {
 
   const fetchArticle = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/articles/${slug}`);
-      if (!response.ok) throw new Error("Article not found");
-      const data = await response.json();
+      const response = await api.get(`/articles/${slug}`);
+      const data = response.data;
 
       setArticleId(data.id);
 

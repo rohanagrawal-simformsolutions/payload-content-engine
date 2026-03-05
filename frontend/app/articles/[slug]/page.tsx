@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCms } from "@/contexts/CmsContext";
 import api from "@/lib/api";
 
 interface Article {
@@ -136,6 +137,7 @@ export default function ArticleDetailPage() {
   const router = useRouter();
   const slug = params.slug as string;
   const { isAuthenticated, token } = useAuth();
+  const { cms } = useCms();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -145,14 +147,12 @@ export default function ArticleDetailPage() {
     if (slug) {
       fetchArticle();
     }
-  }, [slug]);
+  }, [slug, cms]);
 
   const fetchArticle = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/articles/${slug}`);
-      if (!response.ok) throw new Error("Article not found");
-      const data = await response.json();
-      setArticle(data);
+      const response = await api.get(`/articles/${slug}`);
+      setArticle(response.data);
     } catch (err) {
       setError("Failed to load article");
       console.error(err);

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import CmsSwitcher from "./CmsSwitcher";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -43,6 +44,7 @@ export default function Navbar() {
                   <span className="text-gray-700 text-sm">
                     {user?.name || user?.email}
                   </span>
+                  <CmsSwitcher />
                   <button
                     onClick={handleLogout}
                     className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
@@ -65,6 +67,7 @@ export default function Navbar() {
                 >
                   Register
                 </Link>
+                <CmsSwitcher />
               </>
             )}
           </div>
