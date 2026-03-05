@@ -1,16 +1,13 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { User } from "./entities/user.entity.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import { RegisterDto, LoginDto } from "./dto/auth.dto.js";
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
 
@@ -18,7 +15,7 @@ export class AuthService {
     const { email, password, name } = registerDto;
 
     // Check if user exists
-    const existingUser = await this.userRepository.findOne({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
     if (existingUser) {
@@ -29,13 +26,9 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const user = this.userRepository.create({
-      email,
-      password: hashedPassword,
-      name,
+    const user = await this.prisma.user.create({
+      data: { email, password: hashedPassword, name },
     });
-
-    await this.userRepository.save(user);
 
     // Generate token
     const token = this.generateToken(user);
@@ -54,7 +47,7 @@ export class AuthService {
     const { email, password } = loginDto;
 
     // Find user
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
@@ -78,11 +71,11 @@ export class AuthService {
     };
   }
 
-  async validateUser(userId: string): Promise<User> {
-    return this.userRepository.findOne({ where: { id: userId } });
+  async validateUser(userId: string) {
+    return this.prisma.user.findUnique({ where: { id: userId } });
   }
 
-  private generateToken(user: User): string {
+  private generateToken(user: { id: string; email: string }): string {
     const payload = { sub: user.id, email: user.email };
     return this.jwtService.sign(payload);
   }

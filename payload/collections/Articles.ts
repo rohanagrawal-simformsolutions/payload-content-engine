@@ -20,6 +20,13 @@ export const Articles: CollectionConfig = {
       type: "richText",
     },
     {
+      name: "featuredImage",
+      type: "textarea",
+      admin: {
+        description: "Base64 encoded featured image",
+      },
+    },
+    {
       name: "tags",
       type: "array",
       fields: [

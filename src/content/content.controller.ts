@@ -2,6 +2,8 @@ import {
   Controller,
   Post,
   Get,
+  Put,
+  Delete,
   Body,
   UseGuards,
   Request,
@@ -24,6 +26,24 @@ export class ContentController {
     @Request() req,
   ) {
     return this.contentService.createArticle(createArticleDto, req.user.id);
+  }
+
+  // Protected route - update an article by ID
+  @Put("admin/articles/:id")
+  @UseGuards(JwtAuthGuard)
+  async updateArticle(
+    @Param("id") id: string,
+    @Body() updateArticleDto: CreateArticleDto,
+    @Request() req,
+  ) {
+    return this.contentService.updateArticle(id, updateArticleDto);
+  }
+
+  // Protected route - delete an article by ID
+  @Delete("admin/articles/:id")
+  @UseGuards(JwtAuthGuard)
+  async deleteArticle(@Param("id") id: string) {
+    return this.contentService.deleteArticle(id);
   }
 
   // Public route - get all published articles

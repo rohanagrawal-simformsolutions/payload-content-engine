@@ -54,6 +54,10 @@ export class CreateArticleDto {
   content?: any;
 
   @IsOptional()
+  @IsString()
+  featuredImage?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[];

@@ -32,6 +32,51 @@ export class ContentService {
     }
   }
 
+  async updateArticle(id: string, updateArticleDto: CreateArticleDto) {
+    try {
+      const { tags, ...rest } = updateArticleDto;
+      const mappedTags = Array.isArray(tags)
+        ? tags.map((tag) => ({ tag }))
+        : undefined;
+
+      const article = await globalThis.payload.update({
+        collection: "articles",
+        id,
+        data: {
+          ...rest,
+          tags: mappedTags,
+        },
+      });
+
+      return article;
+    } catch (error) {
+      if (error.message?.includes("not found") || error.status === 404) {
+        throw new NotFoundException("Article not found");
+      }
+      throw new BadRequestException(
+        error.message || "Failed to update article",
+      );
+    }
+  }
+
+  async deleteArticle(id: string) {
+    try {
+      await globalThis.payload.delete({
+        collection: "articles",
+        id,
+      });
+
+      return { message: "Article deleted successfully" };
+    } catch (error) {
+      if (error.message?.includes("not found") || error.status === 404) {
+        throw new NotFoundException("Article not found");
+      }
+      throw new BadRequestException(
+        error.message || "Failed to delete article",
+      );
+    }
+  }
+
   async getPublishedArticles(page: number = 1, limit: number = 10) {
     try {
       const now = new Date().toISOString();

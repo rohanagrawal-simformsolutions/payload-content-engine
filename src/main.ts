@@ -6,6 +6,12 @@ import { getPayloadInstance } from "./payload/payload-instance.js";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable CORS
+  app.enableCors({
+    origin: "http://localhost:3001",
+    credentials: true,
+  });
+
   // Enable validation
   app.useGlobalPipes(new ValidationPipe());
 

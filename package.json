@@ -9,7 +9,11 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main",
+    "frontend:install": "cd frontend && npm install",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "dev:all": "./start-all.sh"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
@@ -18,9 +22,10 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.0",
-    "@nestjs/typeorm": "^10.0.1",
     "@payloadcms/db-postgres": "^3.0.0",
     "@payloadcms/richtext-lexical": "^3.0.0",
+    "@prisma/adapter-pg": "^7.4.2",
+    "@prisma/client": "^7.4.2",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -30,8 +35,7 @@
     "payload": "^3.0.0",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.1",
-    "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.0",
@@ -40,6 +44,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.0",
     "@types/passport-jwt": "^4.0.1",
+    "prisma": "^7.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
