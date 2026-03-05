@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsISO8601,
   ValidateNested,
+  IsUUID,
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -98,7 +99,8 @@ export class CreateArticleDto {
 
   @IsOptional()
   @IsString()
-  author?: string;
+  @IsUUID()
+  author?: string; // UUID reference to Users collection
 
   @IsOptional()
   @IsBoolean()

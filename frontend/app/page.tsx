@@ -12,24 +12,43 @@ interface Article {
   summaryTitle?: string;
   featuredImage?: string;
   createdAt: string;
+  status?: "draft" | "published";
 }
 
 export default function HomePage() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [publishedArticles, setPublishedArticles] = useState<Article[]>([]);
+  const [draftArticles, setDraftArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { isAuthenticated, token } = useAuth();
 
   useEffect(() => {
     fetchArticles();
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchArticles = async () => {
     try {
-      const response = await fetch("http://localhost:3000/articles");
-      if (!response.ok) throw new Error("Failed to fetch articles");
-      const data = await response.json();
-      setArticles(data.docs || []);
+      setLoading(true);
+      // Always fetch published articles (public)
+      const publishedResponse = await fetch("http://localhost:3000/articles");
+      if (!publishedResponse.ok) throw new Error("Failed to fetch articles");
+      const publishedData = await publishedResponse.json();
+      setPublishedArticles(publishedData.docs || []);
+
+      // If authenticated, also fetch draft articles
+      if (isAuthenticated && token) {
+        try {
+          const draftResponse = await api.get("/admin/articles?status=draft", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setDraftArticles(draftResponse.data.docs || []);
+        } catch (err) {
+          console.error("Failed to fetch drafts", err);
+          setDraftArticles([]);
+        }
+      } else {
+        setDraftArticles([]);
+      }
     } catch (err) {
       setError("Failed to load articles");
       console.error(err);
@@ -38,7 +57,11 @@ export default function HomePage() {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, article: Article) => {
+  const handleDelete = async (
+    e: React.MouseEvent,
+    article: Article,
+    isDraft: boolean = false
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     const confirmed = window.confirm(
@@ -50,10 +73,30 @@ export default function HomePage() {
       await api.delete(`/admin/articles/${article.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setArticles(articles.filter((a) => a.id !== article.id));
+      if (isDraft) {
+        setDraftArticles(draftArticles.filter((a) => a.id !== article.id));
+      } else {
+        setPublishedArticles(
+          publishedArticles.filter((a) => a.id !== article.id)
+        );
+      }
     } catch (err) {
       console.error("Failed to delete article", err);
       alert("Failed to delete article");
+    }
+  };
+
+  const handlePublish = async (article: Article) => {
+    try {
+      await api.put(`/admin/articles/${article.id}/publish`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Move from drafts to published
+      setDraftArticles(draftArticles.filter((a) => a.id !== article.id));
+      setPublishedArticles([article, ...publishedArticles]);
+    } catch (err) {
+      console.error("Failed to publish article", err);
+      alert("Failed to publish article");
     }
   };
 
@@ -82,13 +125,95 @@ export default function HomePage() {
         </div>
       )}
 
-      {articles.length === 0 ? (
-        <div className="text-center text-gray-500 text-lg">
-          No articles found. Create your first article!
+      {/* Draft Articles Section - Only for Authenticated Users */}
+      {isAuthenticated && draftArticles.length > 0 && (
+        <div className="mb-12">
+          <div className="mb-6 pb-4 border-b-2 border-yellow-300">
+            <h2 className="text-2xl font-bold text-gray-900">
+              📝 My Drafts ({draftArticles.length})
+            </h2>
+            <p className="text-gray-600 mt-1">Only visible to you</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {draftArticles.map((article) => (
+              <div
+                key={article.id}
+                className="bg-yellow-50 border-2 border-yellow-200 rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden relative"
+              >
+                <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">
+                  DRAFT
+                </div>
+                <Link href={`/articles/${article.slug}`}>
+                  {article.featuredImage && (
+                    <div className="w-full h-48 bg-gray-200 relative overflow-hidden">
+                      <img
+                        src={article.featuredImage}
+                        alt={article.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {article.title}
+                    </h3>
+                    {article.summaryTitle && (
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {article.summaryTitle}
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-500">
+                      {new Date(article.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </Link>
+                {isAuthenticated && (
+                  <div className="px-6 pb-4 flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePublish(article);
+                      }}
+                      className="bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700 flex-1"
+                    >
+                      ✓ Publish
+                    </button>
+                    <Link
+                      href={`/articles/${article.slug}/edit`}
+                      className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm hover:bg-yellow-600"
+                    >
+                      ✏️ Edit
+                    </Link>
+                    <button
+                      onClick={(e) => handleDelete(e, article, true)}
+                      className="bg-red-600 text-white px-3 py-1.5 rounded text-sm hover:bg-red-700"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
+      )}
+
+      {/* Published Articles Section */}
+      <div>
+        <div className="mb-6 pb-4 border-b-2 border-blue-300">
+          <h2 className="text-2xl font-bold text-gray-900">
+            📰 Published Articles {publishedArticles.length > 0 && `(${publishedArticles.length})`}
+          </h2>
+        </div>
+
+        {publishedArticles.length === 0 ? (
+          <div className="text-center text-gray-500 text-lg">
+            No published articles yet. {isAuthenticated ? "Create one!" : "Sign in to create articles."}
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {publishedArticles.map((article) => (
             <div
               key={article.id}
               className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden relative"
@@ -124,7 +249,7 @@ export default function HomePage() {
                     ✏️ Edit
                   </Link>
                   <button
-                    onClick={(e) => handleDelete(e, article)}
+                    onClick={(e) => handleDelete(e, article, false)}
                     className="bg-red-600 text-white px-3 py-1.5 rounded text-sm hover:bg-red-700"
                   >
                     🗑️ Delete
@@ -133,8 +258,9 @@ export default function HomePage() {
               )}
             </div>
           ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

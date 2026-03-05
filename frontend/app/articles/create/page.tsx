@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RichTextEditor from "@/components/RichTextEditor";
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
 
 export default function CreateArticlePage() {
   return (
@@ -18,7 +24,7 @@ export default function CreateArticlePage() {
 
 function CreateArticleForm() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -26,13 +32,33 @@ function CreateArticleForm() {
     content: "",
     featuredImage: "",
     tags: "",
+    author: "",
     status: "published" as "draft" | "published",
     searchExclude: false,
     promoted: false,
   });
+  const [users, setUsers] = useState<User[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Fetch users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/users");
+        setUsers(response.data);
+        // Auto-select current user if not already selected
+        if (!formData.author && user?.id) {
+          setFormData((prev) => ({ ...prev, author: user.id }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+      }
+    };
+
+    fetchUsers();
+  }, [user?.id]);
 
   const generateSlug = (title: string) => {
     return title
@@ -247,6 +273,30 @@ function CreateArticleForm() {
               }
               placeholder="Write your article content here..."
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="author"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Author
+            </label>
+            <select
+              id="author"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.author}
+              onChange={(e) =>
+                setFormData({ ...formData, author: e.target.value })
+              }
+            >
+              <option value="">Select an author</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.email})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

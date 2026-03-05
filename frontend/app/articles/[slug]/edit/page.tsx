@@ -8,6 +8,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RichTextEditor from "@/components/RichTextEditor";
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export default function EditArticlePage() {
   return (
     <ProtectedRoute>
@@ -30,18 +36,32 @@ function EditArticleForm() {
     content: "",
     featuredImage: "",
     tags: "",
+    author: "",
     status: "published" as "draft" | "published",
     searchExclude: false,
     promoted: false,
   });
+  const [users, setUsers] = useState<User[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    if (slug) fetchArticle();
+    if (slug) {
+      fetchUsers();
+      fetchArticle();
+    }
   }, [slug]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get("/users");
+      setUsers(response.data);
+    } catch (err) {
+      console.error("Failed to fetch users", err);
+    }
+  };
 
   const fetchArticle = async () => {
     try {
@@ -70,6 +90,7 @@ function EditArticleForm() {
         content: contentHtml,
         featuredImage: data.featuredImage || "",
         tags: tagsStr,
+        author: data.author?.id || "",
         status: data.status || "published",
         searchExclude: data.searchExclude || false,
         promoted: data.promoted || false,
@@ -289,6 +310,30 @@ function EditArticleForm() {
                 setFormData({ ...formData, content })
               }
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="author"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Author
+            </label>
+            <select
+              id="author"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.author}
+              onChange={(e) =>
+                setFormData({ ...formData, author: e.target.value })
+              }
+            >
+              <option value="">Select an author</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.email})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

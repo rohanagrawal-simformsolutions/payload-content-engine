@@ -113,6 +113,9 @@ export const Articles: CollectionConfig = {
     {
       name: "author",
       type: "text",
+      admin: {
+        description: "User ID (UUID) of the article author",
+      },
     },
     {
       name: "promoted",

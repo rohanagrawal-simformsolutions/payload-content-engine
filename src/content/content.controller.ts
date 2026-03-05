@@ -39,11 +39,26 @@ export class ContentController {
     return this.contentService.updateArticle(id, updateArticleDto);
   }
 
-  // Protected route - delete an article by ID
-  @Delete("admin/articles/:id")
+  // Protected route - get all articles (draft + published) for authenticated users
+  @Get("admin/articles")
   @UseGuards(JwtAuthGuard)
-  async deleteArticle(@Param("id") id: string) {
-    return this.contentService.deleteArticle(id);
+  async getAllArticles(
+    @Query("page") page: string = "1",
+    @Query("limit") limit: string = "10",
+    @Query("status") status?: string, // Filter by status: "draft", "published", or omit for all
+  ) {
+    return this.contentService.getAllArticles(
+      parseInt(page),
+      parseInt(limit),
+      status,
+    );
+  }
+
+  // Protected route - publish a draft article (change status to published)
+  @Put("admin/articles/:id/publish")
+  @UseGuards(JwtAuthGuard)
+  async publishArticle(@Param("id") id: string) {
+    return this.contentService.publishArticle(id);
   }
 
   // Public route - get all published articles
@@ -62,5 +77,11 @@ export class ContentController {
   @Get("articles/:slug")
   async getArticleBySlug(@Param("slug") slug: string) {
     return this.contentService.getArticleBySlug(slug);
+  }
+
+  // Public route - get all users for author dropdown
+  @Get("users")
+  async getUsers() {
+    return this.contentService.getUsers();
   }
 }
