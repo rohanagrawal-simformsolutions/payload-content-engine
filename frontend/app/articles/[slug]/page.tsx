@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCms } from "@/contexts/CmsContext";
 import api from "@/lib/api";
+import BlockRenderer, { Block } from "@/components/BlockRenderer";
 
 interface Article {
   id: string;
@@ -13,6 +14,7 @@ interface Article {
   slug: string;
   summaryTitle?: string;
   content?: any;
+  blocks?: Block[];
   featuredImage?: string;
   tags?: Array<string | { id: string; tag: string }>;
   createdAt: string;
@@ -27,9 +29,9 @@ interface Article {
 function renderLexicalContent(content: any): JSX.Element {
   if (!content) return <p className="text-gray-500">No content available</p>;
 
-  // If it's a string, just return it
+  // If it's a string (HTML from TipTap editor), render as HTML directly
   if (typeof content === 'string') {
-    return <div className="text-gray-700 leading-relaxed whitespace-pre-line">{content}</div>;
+    return <div className="prose max-w-none text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: content }} />;
   }
 
   // Handle Payload's Lexical format
@@ -95,6 +97,24 @@ function renderNode(node: any, key: number): JSX.Element {
     );
   }
 
+  // Handle link nodes
+  if (node.type === 'link' || node.type === 'autolink') {
+    return (
+      <a key={key} href={node.url} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+        {node.children?.map((child: any, i: number) => renderNode(child, i))}
+      </a>
+    );
+  }
+
+  // Handle code block nodes (block-level, not inline)
+  if (node.type === 'code') {
+    return (
+      <pre key={key} className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono mb-4">
+        <code>{node.children?.map((child: any, i: number) => renderNode(child, i))}</code>
+      </pre>
+    );
+  }
+
   // Handle text nodes with formatting
   if (node.type === 'text' || node.text !== undefined) {
     let text = node.text || '';
@@ -104,18 +124,17 @@ function renderNode(node: any, key: number): JSX.Element {
       return <span key={key} dangerouslySetInnerHTML={{ __html: text }} />;
     }
 
-    let element = <span key={key}>{text}</span>;
-
     if (node.format) {
-      if (node.format & 1) element = <strong key={key}>{text}</strong>; // bold
-      if (node.format & 2) element = <em key={key}>{text}</em>; // italic
-      if (node.format & 8) element = <code key={key} className="bg-gray-100 px-1 rounded">{text}</code>; // code
+      if (node.format & 8) return <code key={key} className="bg-gray-100 px-1 rounded font-mono text-sm">{text}</code>; // code
+      if ((node.format & 1) && (node.format & 2)) return <strong key={key}><em>{text}</em></strong>; // bold+italic
+      if (node.format & 1) return <strong key={key}>{text}</strong>; // bold
+      if (node.format & 2) return <em key={key}>{text}</em>; // italic
     }
 
-    return element;
+    return <span key={key}>{text}</span>;
   }
 
-  // Handle link nodes
+  // Handle link nodes (kept for backward compat ordering)
   if (node.type === 'link') {
     return (
       <a key={key} href={node.url} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
@@ -276,6 +295,13 @@ export default function ArticleDetailPage() {
           <div className="prose max-w-none">
             {renderLexicalContent(article.content)}
           </div>
+
+          {/* Attached content blocks */}
+          {article.blocks && article.blocks.length > 0 && (
+            <div className="mt-8 space-y-6">
+              <BlockRenderer blocks={article.blocks} />
+            </div>
+          )}
         </div>
       </article>
     </div>

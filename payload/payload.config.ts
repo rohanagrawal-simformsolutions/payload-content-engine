@@ -2,6 +2,20 @@ import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { Articles } from "./collections/Articles.js";
+import {
+  AccordionBlock,
+  TabsBlock,
+  TwoColumnBlock,
+  DownloadsBlock,
+  GalleryBlock,
+  MediaVideoBlock,
+  CardBoxBlock,
+  CTASectionBlock,
+  CarouselBlock,
+  PullQuoteBlock,
+  LogoWallBlock,
+  CodeSnippetBlock,
+} from "./collections/blocks/index.js";
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || "your-secret-key",
@@ -38,6 +52,19 @@ export default buildConfig({
       fields: [],
     },
     Articles,
+    // Component blocks
+    AccordionBlock,
+    TabsBlock,
+    TwoColumnBlock,
+    DownloadsBlock,
+    GalleryBlock,
+    MediaVideoBlock,
+    CardBoxBlock,
+    CTASectionBlock,
+    CarouselBlock,
+    PullQuoteBlock,
+    LogoWallBlock,
+    CodeSnippetBlock,
   ],
 
   // Use Lexical rich text editor

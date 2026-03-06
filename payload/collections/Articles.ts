@@ -20,6 +20,15 @@ export const Articles: CollectionConfig = {
       type: "richText",
     },
     {
+      name: "blocks",
+      type: "json",
+      label: "Content Blocks",
+      admin: {
+        description:
+          "Array of block objects (accordion, tabs, gallery, etc.) rendered after the main content.",
+      },
+    },
+    {
       name: "featuredImage",
       type: "textarea",
       admin: {

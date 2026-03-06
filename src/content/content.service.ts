@@ -780,4 +780,375 @@ export class ContentService {
     const articlesWithAuthors = await this.populateAuthorData(mapped.docs);
     return articlesWithAuthors[0];
   }
+
+  // ===== BLOCK MANAGEMENT METHODS =====
+
+  // Accordion Block Methods
+  async createAccordionBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "accordion-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create accordion block",
+      );
+    }
+  }
+
+  async getAccordionBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "accordion-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Tabs Block Methods
+  async createTabsBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "tabs-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create tabs block",
+      );
+    }
+  }
+
+  async getTabsBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "tabs-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Two-Column Block Methods
+  async createTwoColumnBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "two-column-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create two-column block",
+      );
+    }
+  }
+
+  async getTwoColumnBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "two-column-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Downloads Block Methods
+  async createDownloadsBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "downloads-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create downloads block",
+      );
+    }
+  }
+
+  async getDownloadsBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "downloads-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Gallery Block Methods
+  async createGalleryBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "gallery-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create gallery block",
+      );
+    }
+  }
+
+  async getGalleryBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "gallery-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Media Video Block Methods
+  async createMediaVideoBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "media-video-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create media/video block",
+      );
+    }
+  }
+
+  async getMediaVideoBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "media-video-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Card Box Block Methods
+  async createCardBoxBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "card-box-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create card box block",
+      );
+    }
+  }
+
+  async getCardBoxBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "card-box-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // CTA Section Block Methods
+  async createCTASectionBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "cta-section-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create CTA section block",
+      );
+    }
+  }
+
+  async getCTASectionBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "cta-section-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Carousel Block Methods
+  async createCarouselBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "carousel-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create carousel block",
+      );
+    }
+  }
+
+  async getCarouselBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "carousel-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Pull Quote Block Methods
+  async createPullQuoteBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "pull-quote-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create pull quote block",
+      );
+    }
+  }
+
+  async getPullQuoteBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "pull-quote-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Logo Wall Block Methods
+  async createLogoWallBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "logo-wall-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create logo wall block",
+      );
+    }
+  }
+
+  async getLogoWallBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "logo-wall-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Code Snippet Block Methods
+  async createCodeSnippetBlock(data: any) {
+    try {
+      const block = await globalThis.payload.create({
+        collection: "code-snippet-blocks",
+        data,
+      });
+      return block;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || "Failed to create code snippet block",
+      );
+    }
+  }
+
+  async getCodeSnippetBlocks(page = 1, limit = 10) {
+    try {
+      const blocks = await globalThis.payload.find({
+        collection: "code-snippet-blocks",
+        limit,
+        page,
+      });
+      return blocks;
+    } catch (error) {
+      throw new BadRequestException(error.message || "Failed to fetch blocks");
+    }
+  }
+
+  // Generic update block method
+  async updateBlock(collection: string, id: string, data: any) {
+    try {
+      const block = await globalThis.payload.update({
+        collection,
+        id,
+        data,
+      });
+      return block;
+    } catch (error) {
+      if (error.message?.includes("not found") || error.status === 404) {
+        throw new NotFoundException("Block not found");
+      }
+      throw new BadRequestException(error.message || "Failed to update block");
+    }
+  }
+
+  // Generic delete block method
+  async deleteBlock(collection: string, id: string) {
+    try {
+      await globalThis.payload.delete({
+        collection,
+        id,
+      });
+      return { message: "Block deleted successfully" };
+    } catch (error) {
+      if (error.message?.includes("not found") || error.status === 404) {
+        throw new NotFoundException("Block not found");
+      }
+      throw new BadRequestException(error.message || "Failed to delete block");
+    }
+  }
 }

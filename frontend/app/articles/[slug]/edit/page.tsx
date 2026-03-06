@@ -8,6 +8,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCms } from "@/contexts/CmsContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RichTextEditor from "@/components/RichTextEditor";
+import { getBlocks, BlockType } from "@/lib/blocks";
+
+const BLOCK_TYPES: { key: BlockType; label: string; icon: string }[] = [
+  { key: "accordion",    label: "Accordion",     icon: "📋" },
+  { key: "tabs",         label: "Tabs",          icon: "🗂" },
+  { key: "two-column",   label: "Two Column",    icon: "⬛" },
+  { key: "downloads",    label: "Downloads",     icon: "📥" },
+  { key: "gallery",      label: "Gallery",       icon: "🖼" },
+  { key: "media-video",  label: "Media / Video", icon: "🎬" },
+  { key: "card-box",     label: "Card Box",      icon: "🃏" },
+  { key: "cta-section",  label: "CTA Section",   icon: "📢" },
+  { key: "carousel",     label: "Carousel",      icon: "🎠" },
+  { key: "pull-quote",   label: "Pull Quote",    icon: "💬" },
+  { key: "logo-wall",    label: "Logo Wall",     icon: "🏢" },
+  { key: "code-snippet", label: "Code / Embed",  icon: "💻" },
+];
 
 interface User {
   id: string;
@@ -48,6 +64,33 @@ function EditArticleForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
+  // ── Block picker state ───────────────────────────────────────────────────
+  const [attachedBlocks, setAttachedBlocks] = useState<any[]>([]);
+  const [pickerType, setPickerType] = useState<BlockType>("accordion");
+  const [pickerItems, setPickerItems] = useState<any[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
+
+  const loadPickerBlocks = async (type: BlockType) => {
+    setPickerType(type);
+    setPickerLoading(true);
+    try {
+      const res = await getBlocks(type, 1, 50);
+      setPickerItems(res.docs ?? []);
+    } catch {
+      setPickerItems([]);
+    } finally {
+      setPickerLoading(false);
+    }
+  };
+
+  const attachBlock = (doc: any) => {
+    if (attachedBlocks.some((b) => b.id === doc.id && b.blockType === pickerType)) return;
+    setAttachedBlocks((prev) => [...prev, { ...doc, blockType: pickerType }]);
+  };
+
+  const removeAttached = (id: string) =>
+    setAttachedBlocks((prev) => prev.filter((b) => b.id !== id));
 
   useEffect(() => {
     if (slug) {
@@ -99,6 +142,11 @@ function EditArticleForm() {
 
       if (data.featuredImage) {
         setImagePreview(data.featuredImage);
+      }
+
+      // Restore any previously attached blocks
+      if (Array.isArray(data.blocks) && data.blocks.length > 0) {
+        setAttachedBlocks(data.blocks);
       }
     } catch (err) {
       setError("Failed to load article");
@@ -180,6 +228,7 @@ function EditArticleForm() {
         status: formData.status,
         searchExclude: formData.searchExclude,
         promoted: formData.promoted,
+        blocks: attachedBlocks,
       };
 
       await api.put(`/admin/articles/${articleId}`, articleData, {
@@ -351,6 +400,77 @@ function EditArticleForm() {
                 setFormData({ ...formData, tags: e.target.value })
               }
             />
+          </div>
+
+          {/* ── Block Picker ────────────────────────────────────────────── */}
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Attach Content Blocks</h3>
+            <p className="text-xs text-gray-500 mb-3">
+              Pick a block type, select saved blocks, and they'll render below the article content.
+            </p>
+
+            {/* Type selector */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {BLOCK_TYPES.map(({ key, label, icon }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => loadPickerBlocks(key)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    pickerType === key && pickerItems.length >= 0
+                      ? "bg-blue-600 text-white"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {icon} {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Available blocks of selected type */}
+            {pickerLoading && <p className="text-xs text-gray-400">Loading…</p>}
+            {!pickerLoading && pickerItems.length > 0 && (
+              <div className="space-y-1 mb-3 max-h-40 overflow-y-auto border border-gray-200 rounded bg-white p-2">
+                {pickerItems.map((doc) => {
+                  const attached = attachedBlocks.some((b) => b.id === doc.id && b.blockType === pickerType);
+                  return (
+                    <div key={doc.id} className="flex items-center justify-between text-xs py-1 px-2 hover:bg-gray-50 rounded">
+                      <span className="text-gray-700 truncate">{doc.title || doc.id}</span>
+                      <button
+                        type="button"
+                        onClick={() => attachBlock(doc)}
+                        disabled={attached}
+                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                          attached ? "text-green-600 bg-green-50" : "text-blue-600 hover:bg-blue-50"
+                        }`}
+                      >
+                        {attached ? "✓ Added" : "+ Add"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {!pickerLoading && pickerItems.length === 0 && pickerType && (
+              <p className="text-xs text-gray-400 mb-3">No saved {pickerType} blocks yet. Create one in the Blocks page.</p>
+            )}
+
+            {/* Attached blocks list */}
+            {attachedBlocks.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-gray-600 mb-1">Attached ({attachedBlocks.length}):</p>
+                <div className="space-y-1">
+                  {attachedBlocks.map((b, i) => (
+                    <div key={b.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-2 py-1 text-xs">
+                      <span className="text-gray-500 font-mono mr-2">#{i + 1}</span>
+                      <span className="flex-1 truncate text-gray-700">{b.title || b.id}</span>
+                      <span className="text-gray-400 mx-2">{BLOCK_TYPES.find(t => t.key === b.blockType)?.icon} {b.blockType}</span>
+                      <button type="button" onClick={() => removeAttached(b.id)} className="text-red-400 hover:text-red-600">✕</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

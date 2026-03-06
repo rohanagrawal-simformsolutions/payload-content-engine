@@ -31,6 +31,12 @@ export default function Navbar() {
             >
               Articles
             </Link>
+            <Link
+              href="/blocks"
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Components
+            </Link>
 
             {isAuthenticated ? (
               <>
