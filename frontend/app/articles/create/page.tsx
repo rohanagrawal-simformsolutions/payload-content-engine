@@ -52,6 +52,13 @@ function CreateArticleForm() {
     status: "published" as "draft" | "published",
     searchExclude: false,
     promoted: false,
+    seo: {
+      metaTitle: "",
+      metaDescription: "",
+      ogImage: "",
+      canonicalUrl: "",
+      noIndex: false,
+    },
   });
   const [users, setUsers] = useState<User[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -184,6 +191,13 @@ function CreateArticleForm() {
         searchExclude: formData.searchExclude,
         promoted: formData.promoted,
         blocks: attachedBlocks,
+        seo: {
+          metaTitle: formData.seo.metaTitle || undefined,
+          metaDescription: formData.seo.metaDescription || undefined,
+          ogImage: formData.seo.ogImage || undefined,
+          canonicalUrl: formData.seo.canonicalUrl || undefined,
+          noIndex: formData.seo.noIndex,
+        },
       };
 
       await api.post("/admin/articles", articleData, {
@@ -429,6 +443,105 @@ function CreateArticleForm() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* ── SEO Section ──────────────────────────────────────────────── */}
+          <div className="border border-indigo-200 rounded-lg p-4 bg-indigo-50">
+            <h3 className="text-sm font-semibold text-indigo-800 mb-1">🔍 SEO Settings</h3>
+            <p className="text-xs text-indigo-600 mb-4">
+              These fields are injected as &lt;head&gt; meta tags by the frontend. Leave blank to fall back to the article title and summary.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="seo-metaTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                  Meta Title
+                  <span className="ml-2 text-xs font-normal text-gray-400">50–60 characters recommended</span>
+                </label>
+                <input
+                  type="text"
+                  id="seo-metaTitle"
+                  maxLength={70}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  placeholder="e.g. Mastering Myopia | Training Programs"
+                  value={formData.seo.metaTitle}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, seo: { ...prev.seo, metaTitle: e.target.value } }))
+                  }
+                />
+                <p className="mt-1 text-xs text-gray-400">{formData.seo.metaTitle.length}/70 chars</p>
+              </div>
+
+              <div>
+                <label htmlFor="seo-metaDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                  Meta Description
+                  <span className="ml-2 text-xs font-normal text-gray-400">150–160 characters recommended</span>
+                </label>
+                <textarea
+                  id="seo-metaDescription"
+                  rows={3}
+                  maxLength={200}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  placeholder="Brief description shown in search results…"
+                  value={formData.seo.metaDescription}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, seo: { ...prev.seo, metaDescription: e.target.value } }))
+                  }
+                />
+                <p className="mt-1 text-xs text-gray-400">{formData.seo.metaDescription.length}/200 chars</p>
+              </div>
+
+              <div>
+                <label htmlFor="seo-ogImage" className="block text-sm font-medium text-gray-700 mb-1">
+                  Open Graph Image URL
+                  <span className="ml-2 text-xs font-normal text-gray-400">1200×630 px recommended</span>
+                </label>
+                <input
+                  type="url"
+                  id="seo-ogImage"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  placeholder="https://example.com/images/og-image.jpg"
+                  value={formData.seo.ogImage}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, seo: { ...prev.seo, ogImage: e.target.value } }))
+                  }
+                />
+                <p className="mt-1 text-xs text-gray-400">Shown when shared on social media. Falls back to featured image.</p>
+              </div>
+
+              <div>
+                <label htmlFor="seo-canonicalUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                  Canonical URL
+                </label>
+                <input
+                  type="url"
+                  id="seo-canonicalUrl"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  placeholder="https://example.com/articles/my-article (leave blank for default)"
+                  value={formData.seo.canonicalUrl}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, seo: { ...prev.seo, canonicalUrl: e.target.value } }))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.seo.noIndex}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, seo: { ...prev.seo, noIndex: e.target.checked } }))
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm text-gray-700">
+                    No Index — hide from search engines
+                    <span className="ml-1 text-xs text-gray-400">(adds &lt;meta name="robots" content="noindex"&gt;)</span>
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div>

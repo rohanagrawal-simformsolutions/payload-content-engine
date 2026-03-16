@@ -11,18 +11,26 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 
-class MetaDto {
+class SeoDto {
   @IsOptional()
   @IsString()
-  title?: string;
+  metaTitle?: string;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  metaDescription?: string;
 
   @IsOptional()
   @IsString()
-  image?: string;
+  ogImage?: string;
+
+  @IsOptional()
+  @IsString()
+  canonicalUrl?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  noIndex?: boolean;
 }
 
 class SitemapDto {
@@ -77,8 +85,8 @@ export class CreateArticleDto {
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => MetaDto)
-  meta?: MetaDto;
+  @Type(() => SeoDto)
+  seo?: SeoDto;
 
   @IsOptional()
   @IsBoolean()

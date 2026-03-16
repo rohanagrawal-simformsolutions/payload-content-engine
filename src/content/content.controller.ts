@@ -9,6 +9,8 @@ import {
   Request,
   Query,
   Param,
+  Res,
+  Header,
 } from "@nestjs/common";
 import { ContentService } from "./content.service.js";
 import { CreateArticleDto } from "./dto/create-article.dto.js";
@@ -117,6 +119,15 @@ export class ContentController {
   @Get("users")
   async getUsers() {
     return this.contentService.getUsers();
+  }
+
+  // Public route - XML sitemap combining static pages + all published CMS articles
+  @Get("sitemap.xml")
+  @Header("Content-Type", "application/xml; charset=utf-8")
+  @Header("Cache-Control", "public, max-age=3600")
+  async getSitemap(@Res({ passthrough: true }) _res: any): Promise<string> {
+    const baseUrl = process.env.FRONTEND_URL || "http://localhost:3001";
+    return this.contentService.generateSitemap(baseUrl);
   }
 
   // ===== COMPONENT BLOCKS - ADMIN ROUTES =====

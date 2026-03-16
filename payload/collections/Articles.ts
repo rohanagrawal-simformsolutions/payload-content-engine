@@ -55,20 +55,59 @@ export const Articles: CollectionConfig = {
       type: "text",
     },
     {
-      name: "meta",
+      name: "seo",
       type: "group",
+      label: "SEO",
+      admin: {
+        description:
+          "Search engine optimisation fields. These are returned by the API and rendered as <head> tags by the frontend.",
+      },
       fields: [
         {
-          name: "title",
+          name: "metaTitle",
           type: "text",
+          label: "Meta Title",
+          admin: {
+            description:
+              "Overrides the page <title> tag. Recommended: 50–60 characters.",
+          },
         },
         {
-          name: "description",
+          name: "metaDescription",
           type: "textarea",
+          label: "Meta Description",
+          admin: {
+            description:
+              "Shown in search-engine result snippets. Recommended: 150–160 characters.",
+          },
         },
         {
-          name: "image",
+          name: "ogImage",
           type: "text",
+          label: "Open Graph Image URL",
+          admin: {
+            description:
+              "Image shown when the page is shared on social media. Recommended size: 1200×630 px.",
+          },
+        },
+        {
+          name: "canonicalUrl",
+          type: "text",
+          label: "Canonical URL",
+          admin: {
+            description:
+              "Prevents duplicate-content penalties. Leave blank to use the default page URL.",
+          },
+        },
+        {
+          name: "noIndex",
+          type: "checkbox",
+          label: "No Index",
+          defaultValue: false,
+          admin: {
+            description:
+              'Tick to hide this page from search engines (adds <meta name="robots" content="noindex, nofollow">).',
+          },
         },
       ],
     },

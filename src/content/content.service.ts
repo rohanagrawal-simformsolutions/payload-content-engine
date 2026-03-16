@@ -1151,4 +1151,75 @@ export class ContentService {
       throw new BadRequestException(error.message || "Failed to delete block");
     }
   }
+
+  // ── Sitemap ────────────────────────────────────────────────────────────
+  async generateSitemap(baseUrl: string): Promise<string> {
+    try {
+      const now = new Date().toISOString();
+
+      // Fetch all published articles (up to 1 000)
+      const result = await globalThis.payload.find({
+        collection: "articles",
+        where: {
+          and: [
+            { status: { equals: "published" } },
+            {
+              or: [
+                { publishAt: { less_than_equal: now } },
+                { publishAt: { exists: false } },
+              ],
+            },
+          ],
+        },
+        limit: 1000,
+        sort: "-updatedAt",
+      });
+
+      const urls: string[] = [];
+
+      // Static pages
+      urls.push(
+        `  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`,
+      );
+
+      // CMS-managed articles
+      for (const doc of result.docs as any[]) {
+        // Skip articles explicitly excluded from search / sitemap
+        if (doc.searchExclude) continue;
+        if (doc.sitemap?.inclusion === "excluded") continue;
+
+        const loc = `${baseUrl}/articles/${doc.slug}`;
+        const lastmod = (doc.updatedAt ?? doc.createdAt ?? now).split("T")[0];
+        const changefreq = doc.sitemap?.changeFrequency ?? "weekly";
+        const priority = doc.sitemap?.inclusion === "included" ? "0.9" : "0.7";
+
+        urls.push(
+          `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`,
+        );
+      }
+
+      return [
+        `<?xml version="1.0" encoding="UTF-8"?>`,
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+        ...urls,
+        `</urlset>`,
+      ].join("\n");
+    } catch {
+      // Return a minimal valid sitemap so the endpoint never 500s
+      return [
+        `<?xml version="1.0" encoding="UTF-8"?>`,
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+        `</urlset>`,
+      ].join("\n");
+    }
+  }
 }
